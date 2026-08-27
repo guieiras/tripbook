@@ -19,6 +19,21 @@ enum TravelMode {
   PLANE
 }
 
+enum ActivityType {
+  HOTEL
+  SHOPPING
+  FREE_TIME
+  PARK
+  MUSEUM
+  FOOD
+  SIGHTSEEING
+  NIGHTLIFE
+  BEACH
+  NATURE
+  EVENT
+  OTHER
+}
+
 model Trip {
   id        String   @id @default(uuid())
   slug      String   @unique
@@ -64,6 +79,7 @@ model Activity {
   children Activity[] @relation("ActivityChildren")
 
   title       String
+  type        ActivityType?
   description String?
   location    String?
 

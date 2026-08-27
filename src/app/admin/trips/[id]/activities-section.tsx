@@ -15,8 +15,9 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { TravelIcon, TRAVEL_MODE_LABEL } from "@/components/travel-icon";
+import { ActivityTypeIcon, ACTIVITY_TYPE_LABEL } from "@/components/activity-type-icon";
 import type { ActivityModel as Activity } from "@/generated/prisma/models";
-import { TravelMode } from "@/generated/prisma/enums";
+import { ActivityType, TravelMode } from "@/generated/prisma/enums";
 import { formatDay } from "@/lib/format-day";
 import { dayKey } from "@/lib/day";
 
@@ -248,6 +249,7 @@ function ActivityRow({
         <Stack>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
             {activity.travelMode && <TravelIcon mode={activity.travelMode} sx={{ fontSize: 16, color: "text.secondary" }} />}
+            {activity.type && <ActivityTypeIcon type={activity.type} sx={{ fontSize: 16, color: "text.secondary" }} />}
             <Typography variant={nested ? "body2" : "subtitle1"} sx={{ fontWeight: nested ? 600 : undefined }}>
               {activity.title}
             </Typography>
@@ -360,6 +362,15 @@ function ActivityForm({
       spacing={1.5}
     >
       <TextField name="title" label="Title" required fullWidth size={size} defaultValue={activity?.title} />
+
+      <TextField name="type" label="Type" select defaultValue={activity?.type ?? ""} fullWidth size={size}>
+        <MenuItem value="">— None —</MenuItem>
+        {Object.values(ActivityType).map((type) => (
+          <MenuItem key={type} value={type}>
+            {ACTIVITY_TYPE_LABEL[type]}
+          </MenuItem>
+        ))}
+      </TextField>
 
       {!fixedParentId && (
         <TextField

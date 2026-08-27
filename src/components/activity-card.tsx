@@ -5,6 +5,7 @@ import Stack from "@mui/material/Stack";
 import PlaceIcon from "@mui/icons-material/PlaceOutlined";
 import { TimeRange } from "@/components/time-range";
 import { TravelSegment } from "@/components/travel-segment";
+import { ActivityTypeIcon } from "@/components/activity-type-icon";
 import type { ActivityWithChildren } from "@/lib/itinerary";
 import type { TravelMode } from "@/generated/prisma/enums";
 
@@ -23,7 +24,12 @@ export function ActivityCard({ activity }: { activity: ActivityWithChildren }) {
       <Card variant="outlined">
         <CardContent sx={{ "&:last-child": { pb: 2 } }}>
           <Stack spacing={0.75}>
-            <Typography variant="subtitle1">{activity.title}</Typography>
+            <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+              {activity.type && (
+                <ActivityTypeIcon type={activity.type} sx={{ fontSize: 18, color: "text.secondary" }} />
+              )}
+              <Typography variant="subtitle1">{activity.title}</Typography>
+            </Stack>
 
             <TimeRange
               start={activity.startTime}
@@ -52,9 +58,14 @@ export function ActivityCard({ activity }: { activity: ActivityWithChildren }) {
                   {child.travelMode && child.travelMinsFromPrev ? (
                     <TravelSegment mode={child.travelMode as TravelMode} mins={child.travelMinsFromPrev} />
                   ) : null}
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {child.title}
-                  </Typography>
+                  <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                    {child.type && (
+                      <ActivityTypeIcon type={child.type} sx={{ fontSize: 16, color: "text.secondary" }} />
+                    )}
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {child.title}
+                    </Typography>
+                  </Stack>
                   <TimeRange
                     start={child.startTime}
                     end={child.endTime}

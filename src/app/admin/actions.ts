@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slug";
 import { checkAdminPassword, clearAdminCookie, isAdminAuthed, setAdminCookie } from "@/lib/auth";
-import type { TravelMode } from "@/generated/prisma/enums";
+import type { ActivityType, TravelMode } from "@/generated/prisma/enums";
 
 async function requireAdmin() {
   if (!(await isAdminAuthed())) {
@@ -127,6 +127,7 @@ function activityDataFromForm(formData: FormData) {
   const startTime = String(formData.get("startTime") ?? "");
   const endTime = String(formData.get("endTime") ?? "");
   const recommendedMins = String(formData.get("recommendedMins") ?? "");
+  const type = String(formData.get("type") ?? "");
   const travelMode = String(formData.get("travelMode") ?? "");
   const travelMinsFromPrev = String(formData.get("travelMinsFromPrev") ?? "");
   const parentId = String(formData.get("parentId") ?? "") || null;
@@ -134,6 +135,7 @@ function activityDataFromForm(formData: FormData) {
   return {
     parentId,
     title,
+    type: type ? (type as ActivityType) : null,
     description: String(formData.get("description") ?? "") || null,
     location: String(formData.get("location") ?? "") || null,
     date: date ? new Date(date) : null,
