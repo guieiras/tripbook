@@ -90,6 +90,11 @@ function FlightRow({
         <Collapse in={editing}>
           <Stack sx={{ pt: 2 }}>
             <FlightForm
+              // Remount when the saved data actually changes, so
+              // uncontrolled fields (defaultValue/defaultChecked) don't
+              // go stale after a save — Collapse keeps this mounted, it
+              // never remounts on its own.
+              key={JSON.stringify(flight)}
               action={updateFlight.bind(null, tripId, flight.id)}
               submitLabel="Save"
               flight={flight}

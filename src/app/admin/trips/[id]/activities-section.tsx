@@ -276,6 +276,11 @@ function ActivityRow({
       <Collapse in={editing}>
         <Stack sx={{ pt: 1 }}>
           <ActivityForm
+            // Remount when the saved data actually changes, so
+            // uncontrolled fields (defaultValue/defaultChecked) don't go
+            // stale after a save — Collapse keeps this mounted, it never
+            // remounts on its own.
+            key={activity.updatedAt.toISOString()}
             action={updateActivity.bind(null, tripId, activity.id)}
             submitLabel="Save"
             activity={activity}
