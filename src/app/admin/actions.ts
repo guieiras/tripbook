@@ -76,13 +76,22 @@ function toDateTime(dateStr: string, timeStr: string) {
   return new Date(`${dateStr}T${timeStr}:00`);
 }
 
+function addDays(dateStr: string, days: number) {
+  const d = new Date(`${dateStr}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
 function flightDataFromForm(formData: FormData) {
   const fromAirport = String(formData.get("fromAirport") ?? "").trim();
   const toAirport = String(formData.get("toAirport") ?? "").trim();
   const departureDate = String(formData.get("departureDate") ?? "");
   const departureTime = String(formData.get("departureTime") ?? "");
   const arrivalTime = String(formData.get("arrivalTime") ?? "");
+  const overnight = formData.get("overnight") === "on";
   if (!fromAirport || !toAirport || !departureDate || !departureTime || !arrivalTime) return null;
+
+  const arrivalDate = overnight ? addDays(departureDate, 1) : departureDate;
 
   return {
     fromAirport,
@@ -91,7 +100,8 @@ function flightDataFromForm(formData: FormData) {
     flightNumber: String(formData.get("flightNumber") ?? "") || null,
     confirmation: String(formData.get("confirmation") ?? "") || null,
     departureAt: toDateTime(departureDate, departureTime)!,
-    arrivalAt: toDateTime(departureDate, arrivalTime)!,
+    arrivalAt: toDateTime(arrivalDate, arrivalTime)!,
+    overnight,
   };
 }
 

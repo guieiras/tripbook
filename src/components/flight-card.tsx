@@ -18,6 +18,11 @@ export function FlightCard({ flight }: { flight: TripWithDetails["flights"][numb
         </Stack>
         <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
           {format(flight.departureAt, "HH:mm")} – {format(flight.arrivalAt, "HH:mm")}
+          {flight.overnight && (
+            <Typography component="span" variant="caption" sx={{ verticalAlign: "super", ml: 0.25 }}>
+              +1
+            </Typography>
+          )}
           {flight.airline ? ` · ${flight.airline}` : ""}
           {flight.flightNumber ? ` ${flight.flightNumber}` : ""}
         </Typography>

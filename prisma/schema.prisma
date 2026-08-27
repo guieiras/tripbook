@@ -60,6 +60,7 @@ model Flight {
   toAirport     String
   departureAt   DateTime
   arrivalAt     DateTime
+  overnight     Boolean  @default(false)
   confirmation  String?
   notes         String?
   sortOrder     Int      @default(0)

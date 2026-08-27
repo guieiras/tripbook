@@ -9,6 +9,8 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import IconButton from "@mui/material/IconButton";
 import Collapse from "@mui/material/Collapse";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { format } from "date-fns";
@@ -69,6 +71,7 @@ function FlightRow({
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {formatDay(flight.departureAt, "MMM d")}, {format(flight.departureAt, "HH:mm")} – {format(flight.arrivalAt, "HH:mm")}
+              {flight.overnight ? " (+1 day)" : ""}
               {flight.airline ? ` · ${flight.airline} ${flight.flightNumber ?? ""}` : ""}
             </Typography>
           </Stack>
@@ -160,6 +163,10 @@ function FlightForm({
           slotProps={{ inputLabel: { shrink: true } }}
         />
       </Stack>
+      <FormControlLabel
+        control={<Checkbox name="overnight" defaultChecked={flight?.overnight ?? false} size={size} />}
+        label="Arrives next day (overnight)"
+      />
       <Stack direction="row" spacing={2}>
         <TextField name="airline" label="Airline" fullWidth size={size} defaultValue={flight?.airline ?? ""} />
         <TextField name="flightNumber" label="Flight #" fullWidth size={size} defaultValue={flight?.flightNumber ?? ""} />
