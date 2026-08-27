@@ -8,6 +8,8 @@ import { getTripBySlug, groupByDay } from "@/lib/itinerary";
 import { formatDay } from "@/lib/format-day";
 import { ActivityCard } from "@/components/activity-card";
 import { FlightCard } from "@/components/flight-card";
+import { FlightArrivalCard } from "@/components/flight-arrival-card";
+import { ActivityContinuationCard } from "@/components/activity-continuation-card";
 
 export default async function TripPage({
   params,
@@ -37,6 +39,12 @@ export default async function TripPage({
                 {formatDay(day.date, "EEEE, MMM d")}
               </Typography>
               <Stack spacing={1.5}>
+                {day.flightContinuations.map((flight) => (
+                  <FlightArrivalCard key={`${flight.id}-arrival`} flight={flight} />
+                ))}
+                {day.activityContinuations.map((activity) => (
+                  <ActivityContinuationCard key={`${activity.id}-continuation`} activity={activity} />
+                ))}
                 {day.flights.map((flight) => (
                   <FlightCard key={flight.id} flight={flight} />
                 ))}

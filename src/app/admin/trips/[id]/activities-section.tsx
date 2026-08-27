@@ -10,6 +10,8 @@ import CardContent from "@mui/material/CardContent";
 import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Collapse from "@mui/material/Collapse";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddIcon from "@mui/icons-material/Add";
@@ -258,6 +260,7 @@ function ActivityRow({
             {activity.date ? formatDay(activity.date, "MMM d") : "No date"}
             {activity.startTime ? ` · ${format(activity.startTime, "HH:mm")}` : ""}
             {activity.endTime ? `–${format(activity.endTime, "HH:mm")}` : ""}
+            {activity.overnight ? " (+1 day)" : ""}
             {activity.recommendedMins ? ` · ~${activity.recommendedMins}min` : ""}
           </Typography>
         </Stack>
@@ -436,6 +439,11 @@ function ActivityForm({
           slotProps={{ inputLabel: { shrink: true } }}
         />
       </Stack>
+
+      <FormControlLabel
+        control={<Checkbox name="overnight" defaultChecked={activity?.overnight ?? false} size={size} />}
+        label="Ends next day (overnight)"
+      />
 
       <TextField name="location" label="Location" fullWidth size={size} defaultValue={activity?.location ?? ""} />
       <TextField

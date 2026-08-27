@@ -87,6 +87,7 @@ model Activity {
   date              DateTime?  @db.Date
   startTime         DateTime?
   endTime           DateTime?
+  overnight         Boolean    @default(false)
   recommendedMins   Int?
 
   travelMode        TravelMode?
