@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tripbook
 
-## Getting Started
+Minimal itinerary app: create a private trip in a small admin panel, share the
+public read-only page at `/t/<slug>`.
 
-First, run the development server:
+- **Frontend**: Next.js (App Router) + MUI, mobile-first
+- **Data**: Postgres via Prisma (driver adapter `@prisma/adapter-pg`)
+- **Admin**: single password, stored as a bcrypt hash (`ADMIN_PASSWORD_HASH` env var, no user accounts)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Local development
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. Start a local Postgres (or point `DATABASE_URL` at any Postgres instance):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ```bash
+   docker run -d --name tripbook-db \
+     -e POSTGRES_USER=tripbook -e POSTGRES_PASSWORD=tripbook -e POSTGRES_DB=tripbook \
+     -p 55432:5432 postgres:16-alpine
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Copy `.env.example` to `.env`, fill in `DATABASE_URL`, and generate a password hash:
 
-## Learn More
+   ```bash
+   node scripts/hash-password.mjs "your password"
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+   Paste the output into `ADMIN_PASSWORD_HASH` in `.env`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Install deps and run migrations:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm install
+   npx prisma migrate dev
+   ```
 
-## Deploy on Vercel
+4. `npm run dev`, then visit `/admin` and log in with the password you hashed.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploying to Vercel with a free database
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Database**: create a free Postgres database — either
+   [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres) (powered by Neon)
+   from the Vercel dashboard, or a free [Neon](https://neon.tech) project directly.
+   Copy the connection string.
+2. In the Vercel project settings, add environment variables:
+   - `DATABASE_URL` — the Postgres connection string
+   - `ADMIN_PASSWORD_HASH` — output of `node scripts/hash-password.mjs "your password"`
+3. Run `npx prisma migrate deploy` against that `DATABASE_URL` once (locally, with
+   the env var set) to create the schema on the hosted database.
+4. Deploy. The public trip pages live at `/t/<slug>`; the admin panel at `/admin`.
+
+## Data model
+
+- `Trip` — title, dates, unique public `slug`
+- `Flight` — belongs to a trip
+- `Activity` — belongs to a trip, optionally nested one level under another
+  `Activity` (e.g. a park containing things to do, a street containing shops),
+  with a `travelMode` + `travelMinsFromPrev` to render the "time to get here"
+  segment before it.
