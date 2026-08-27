@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { TravelIcon, TRAVEL_MODE_LABEL } from "@/components/travel-icon";
 import type { ActivityModel as Activity } from "@/generated/prisma/models";
 import { TravelMode } from "@/generated/prisma/enums";
+import { formatDay } from "@/lib/format-day";
 
 type CreateActivity = (tripId: string, formData: FormData) => Promise<void>;
 type DeleteActivity = (tripId: string, activityId: string) => Promise<void>;
@@ -95,7 +96,7 @@ function ActivityRow({
           </Typography>
         </Stack>
         <Typography variant="caption" color="text.secondary">
-          {activity.date ? format(activity.date, "MMM d") : "No date"}
+          {activity.date ? formatDay(activity.date, "MMM d") : "No date"}
           {activity.startTime ? ` · ${format(activity.startTime, "HH:mm")}` : ""}
           {activity.endTime ? `–${format(activity.endTime, "HH:mm")}` : ""}
           {activity.recommendedMins ? ` · ~${activity.recommendedMins}min` : ""}
@@ -196,7 +197,7 @@ function ActivityForm({
           type="date"
           fullWidth
           size={compact ? "small" : "medium"}
-          defaultValue={defaultDate ? format(defaultDate, "yyyy-MM-dd") : ""}
+          defaultValue={defaultDate ? formatDay(defaultDate, "yyyy-MM-dd") : ""}
           slotProps={{ inputLabel: { shrink: true } }}
         />
         <TextField

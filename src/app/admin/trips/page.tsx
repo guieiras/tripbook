@@ -5,10 +5,10 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { format } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { createTrip, logout } from "@/app/admin/actions";
 import { NavCardActionArea } from "@/components/nav-card-action-area";
+import { formatDay } from "@/lib/format-day";
 
 export default async function TripsListPage() {
   const trips = await prisma.trip.findMany({ orderBy: { startDate: "desc" } });
@@ -31,7 +31,7 @@ export default async function TripsListPage() {
               <CardContent>
                 <Typography variant="subtitle1">{trip.title}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {format(trip.startDate, "MMM d")} – {format(trip.endDate, "MMM d, yyyy")}
+                  {formatDay(trip.startDate, "MMM d")} – {formatDay(trip.endDate, "MMM d, yyyy")}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   /t/{trip.slug}

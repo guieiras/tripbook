@@ -4,8 +4,8 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
-import { format } from "date-fns";
 import { getTripBySlug, groupByDay } from "@/lib/itinerary";
+import { formatDay } from "@/lib/format-day";
 import { ActivityCard } from "@/components/activity-card";
 import { FlightCard } from "@/components/flight-card";
 
@@ -26,7 +26,7 @@ export default async function TripPage({
         <Stack spacing={0.5} sx={{ mb: 3 }}>
           <Typography variant="h1">{trip.title}</Typography>
           <Typography variant="body2" color="text.secondary">
-            {format(trip.startDate, "MMM d")} – {format(trip.endDate, "MMM d, yyyy")}
+            {formatDay(trip.startDate, "MMM d")} – {formatDay(trip.endDate, "MMM d, yyyy")}
           </Typography>
         </Stack>
 
@@ -34,7 +34,7 @@ export default async function TripPage({
           {days.map((day) => (
             <Box key={day.date.toISOString()}>
               <Typography variant="h2" sx={{ mb: 1.5 }}>
-                {format(day.date, "EEEE, MMM d")}
+                {formatDay(day.date, "EEEE, MMM d")}
               </Typography>
               <Stack spacing={1.5}>
                 {day.flights.map((flight) => (
