@@ -1,0 +1,85 @@
+// Prisma schema for Tripbook
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TravelMode {
+  WALK
+  CAR
+  TRAIN
+  BUS
+  BIKE
+  BOAT
+  PLANE
+}
+
+model Trip {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  title     String
+  startDate DateTime @db.Date
+  endDate   DateTime @db.Date
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  flights    Flight[]
+  activities Activity[]
+
+  @@index([slug])
+}
+
+model Flight {
+  id       String @id @default(uuid())
+  trip     Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId   String
+
+  airline       String?
+  flightNumber  String?
+  fromAirport   String
+  toAirport     String
+  departureAt   DateTime
+  arrivalAt     DateTime
+  confirmation  String?
+  notes         String?
+  sortOrder     Int      @default(0)
+
+  @@index([tripId])
+}
+
+// Activities can nest one level: a top-level activity (e.g. a park, a street)
+// can contain child activities (e.g. things to do inside the park, stores on the street).
+model Activity {
+  id       String @id @default(uuid())
+  trip     Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId   String
+
+  parent   Activity?  @relation("ActivityChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId String?
+  children Activity[] @relation("ActivityChildren")
+
+  title       String
+  description String?
+  location    String?
+
+  date              DateTime?  @db.Date
+  startTime         DateTime?
+  endTime           DateTime?
+  recommendedMins   Int?
+
+  travelMode        TravelMode?
+  travelMinsFromPrev Int?
+
+  sortOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tripId])
+  @@index([parentId])
+}
