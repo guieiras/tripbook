@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { dayKey, dateFromKey } from "@/lib/day";
 
 export async function getTripBySlug(slug: string) {
   const trip = await prisma.trip.findUnique({
@@ -26,13 +27,6 @@ export function groupByDay(trip: TripWithDetails) {
     string,
     { date: Date; activities: ActivityWithChildren[]; flights: TripWithDetails["flights"] }
   >();
-
-  const dayKey = (d: Date) => d.toISOString().slice(0, 10);
-  // Reconstruct the group's date purely from its key, as UTC midnight — so
-  // it always has the same date-only semantics regardless of whether an
-  // activity (already UTC midnight) or a flight (a real timestamp) created
-  // the entry first.
-  const dateFromKey = (key: string) => new Date(`${key}T00:00:00.000Z`);
 
   for (const activity of trip.activities) {
     const date = activity.date ?? trip.startDate;
