@@ -76,28 +76,40 @@ function toDateTime(dateStr: string, timeStr: string) {
   return new Date(`${dateStr}T${timeStr}:00`);
 }
 
-export async function createFlight(tripId: string, formData: FormData) {
-  await requireAdmin();
+function flightDataFromForm(formData: FormData) {
   const fromAirport = String(formData.get("fromAirport") ?? "").trim();
   const toAirport = String(formData.get("toAirport") ?? "").trim();
   const departureDate = String(formData.get("departureDate") ?? "");
   const departureTime = String(formData.get("departureTime") ?? "");
   const arrivalTime = String(formData.get("arrivalTime") ?? "");
-  if (!fromAirport || !toAirport || !departureDate || !departureTime || !arrivalTime) return;
+  if (!fromAirport || !toAirport || !departureDate || !departureTime || !arrivalTime) return null;
 
-  await prisma.flight.create({
-    data: {
-      tripId,
-      fromAirport,
-      toAirport,
-      airline: String(formData.get("airline") ?? "") || null,
-      flightNumber: String(formData.get("flightNumber") ?? "") || null,
-      confirmation: String(formData.get("confirmation") ?? "") || null,
-      departureAt: toDateTime(departureDate, departureTime)!,
-      arrivalAt: toDateTime(departureDate, arrivalTime)!,
-    },
-  });
+  return {
+    fromAirport,
+    toAirport,
+    airline: String(formData.get("airline") ?? "") || null,
+    flightNumber: String(formData.get("flightNumber") ?? "") || null,
+    confirmation: String(formData.get("confirmation") ?? "") || null,
+    departureAt: toDateTime(departureDate, departureTime)!,
+    arrivalAt: toDateTime(departureDate, arrivalTime)!,
+  };
+}
 
+export async function createFlight(tripId: string, formData: FormData) {
+  await requireAdmin();
+  const data = flightDataFromForm(formData);
+  if (!data) return;
+
+  await prisma.flight.create({ data: { tripId, ...data } });
+  revalidatePath(`/admin/trips/${tripId}`);
+}
+
+export async function updateFlight(tripId: string, flightId: string, formData: FormData) {
+  await requireAdmin();
+  const data = flightDataFromForm(formData);
+  if (!data) return;
+
+  await prisma.flight.update({ where: { id: flightId }, data });
   revalidatePath(`/admin/trips/${tripId}`);
 }
 
@@ -107,10 +119,9 @@ export async function deleteFlight(tripId: string, flightId: string) {
   revalidatePath(`/admin/trips/${tripId}`);
 }
 
-export async function createActivity(tripId: string, formData: FormData) {
-  await requireAdmin();
+function activityDataFromForm(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
-  if (!title) return;
+  if (!title) return null;
 
   const date = String(formData.get("date") ?? "");
   const startTime = String(formData.get("startTime") ?? "");
@@ -120,22 +131,35 @@ export async function createActivity(tripId: string, formData: FormData) {
   const travelMinsFromPrev = String(formData.get("travelMinsFromPrev") ?? "");
   const parentId = String(formData.get("parentId") ?? "") || null;
 
-  await prisma.activity.create({
-    data: {
-      tripId,
-      parentId,
-      title,
-      description: String(formData.get("description") ?? "") || null,
-      location: String(formData.get("location") ?? "") || null,
-      date: date ? new Date(date) : null,
-      startTime: date && startTime ? toDateTime(date, startTime) : null,
-      endTime: date && endTime ? toDateTime(date, endTime) : null,
-      recommendedMins: recommendedMins ? Number(recommendedMins) : null,
-      travelMode: travelMode ? (travelMode as TravelMode) : null,
-      travelMinsFromPrev: travelMinsFromPrev ? Number(travelMinsFromPrev) : null,
-    },
-  });
+  return {
+    parentId,
+    title,
+    description: String(formData.get("description") ?? "") || null,
+    location: String(formData.get("location") ?? "") || null,
+    date: date ? new Date(date) : null,
+    startTime: date && startTime ? toDateTime(date, startTime) : null,
+    endTime: date && endTime ? toDateTime(date, endTime) : null,
+    recommendedMins: recommendedMins ? Number(recommendedMins) : null,
+    travelMode: travelMode ? (travelMode as TravelMode) : null,
+    travelMinsFromPrev: travelMinsFromPrev ? Number(travelMinsFromPrev) : null,
+  };
+}
 
+export async function createActivity(tripId: string, formData: FormData) {
+  await requireAdmin();
+  const data = activityDataFromForm(formData);
+  if (!data) return;
+
+  await prisma.activity.create({ data: { tripId, ...data } });
+  revalidatePath(`/admin/trips/${tripId}`);
+}
+
+export async function updateActivity(tripId: string, activityId: string, formData: FormData) {
+  await requireAdmin();
+  const data = activityDataFromForm(formData);
+  if (!data) return;
+
+  await prisma.activity.update({ where: { id: activityId }, data });
   revalidatePath(`/admin/trips/${tripId}`);
 }
 

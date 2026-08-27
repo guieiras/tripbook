@@ -10,8 +10,11 @@ import {
   deleteActivity,
   deleteFlight,
   deleteTrip,
+  updateActivity,
+  updateFlight,
   updateTrip,
 } from "@/app/admin/actions";
+import { tripDayRange } from "@/lib/day";
 import { TripDetailsForm } from "./trip-details-form";
 import { FlightsSection } from "./flights-section";
 import { ActivitiesSection } from "./activities-section";
@@ -36,6 +39,7 @@ export default async function EditTripPage({
   if (!trip) notFound();
 
   const topLevelActivities = trip.activities.filter((a) => a.parentId === null);
+  const days = tripDayRange(trip);
 
   return (
     <Container sx={{ py: 3, pb: 8 }}>
@@ -62,14 +66,17 @@ export default async function EditTripPage({
         tripId={trip.id}
         flights={trip.flights}
         createFlight={createFlight}
+        updateFlight={updateFlight}
         deleteFlight={deleteFlight}
       />
 
       <ActivitiesSection
         tripId={trip.id}
+        days={days}
         activities={trip.activities}
         topLevelActivities={topLevelActivities}
         createActivity={createActivity}
+        updateActivity={updateActivity}
         deleteActivity={deleteActivity}
       />
     </Container>

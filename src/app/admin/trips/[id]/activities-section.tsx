@@ -11,102 +11,279 @@ import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Collapse from "@mui/material/Collapse";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { TravelIcon, TRAVEL_MODE_LABEL } from "@/components/travel-icon";
 import type { ActivityModel as Activity } from "@/generated/prisma/models";
 import { TravelMode } from "@/generated/prisma/enums";
 import { formatDay } from "@/lib/format-day";
+import { dayKey } from "@/lib/day";
 
 type CreateActivity = (tripId: string, formData: FormData) => Promise<void>;
+type UpdateActivity = (tripId: string, activityId: string, formData: FormData) => Promise<void>;
 type DeleteActivity = (tripId: string, activityId: string) => Promise<void>;
 
 export function ActivitiesSection({
   tripId,
+  days,
   activities,
   topLevelActivities,
   createActivity,
+  updateActivity,
   deleteActivity,
 }: {
   tripId: string;
+  days: Date[];
   activities: Activity[];
   topLevelActivities: Activity[];
   createActivity: CreateActivity;
+  updateActivity: UpdateActivity;
   deleteActivity: DeleteActivity;
 }) {
   const childrenOf = (parentId: string) => activities.filter((a) => a.parentId === parentId);
+
+  const topLevelByDay = new Map<string, Activity[]>();
+  const unscheduled: Activity[] = [];
+  for (const activity of topLevelActivities) {
+    if (!activity.date) {
+      unscheduled.push(activity);
+      continue;
+    }
+    const key = dayKey(activity.date);
+    if (!topLevelByDay.has(key)) topLevelByDay.set(key, []);
+    topLevelByDay.get(key)!.push(activity);
+  }
 
   return (
     <Stack spacing={2}>
       <Typography variant="h2">Activities</Typography>
 
-      <Stack spacing={1.5}>
-        {topLevelActivities.map((activity) => (
-          <Card key={activity.id} variant="outlined">
-            <CardContent sx={{ "&:last-child": { pb: 2 } }}>
-              <ActivityRow activity={activity} tripId={tripId} onDelete={deleteActivity} />
-
-              {childrenOf(activity.id).length > 0 && (
-                <Stack spacing={1} sx={{ mt: 1, pl: 2, borderLeft: "2px solid", borderColor: "divider" }}>
-                  {childrenOf(activity.id).map((child) => (
-                    <ActivityRow key={child.id} activity={child} tripId={tripId} onDelete={deleteActivity} nested />
-                  ))}
-                </Stack>
-              )}
-
-              <AddActivityInline
-                tripId={tripId}
-                parentId={activity.id}
-                parentDate={activity.date}
-                createActivity={createActivity}
-                label="Add nested item"
-              />
-            </CardContent>
-          </Card>
-        ))}
-        {topLevelActivities.length === 0 && (
-          <Typography color="text.secondary">No activities yet — add one below.</Typography>
-        )}
+      <Stack spacing={3}>
+        {days.map((day) => {
+          const key = dayKey(day);
+          return (
+            <DaySection
+              key={key}
+              tripId={tripId}
+              day={day}
+              activities={topLevelByDay.get(key) ?? []}
+              childrenOf={childrenOf}
+              topLevelActivities={topLevelActivities}
+              createActivity={createActivity}
+              updateActivity={updateActivity}
+              deleteActivity={deleteActivity}
+            />
+          );
+        })}
       </Stack>
 
-      <Typography variant="h3">New activity</Typography>
-      <ActivityForm tripId={tripId} createActivity={createActivity} topLevelActivities={topLevelActivities} />
+      {unscheduled.length > 0 && (
+        <Stack spacing={1.5}>
+          <Typography variant="h3">Unscheduled</Typography>
+          {unscheduled.map((activity) => (
+            <ActivityCardEditable
+              key={activity.id}
+              tripId={tripId}
+              activity={activity}
+              childActivities={childrenOf(activity.id)}
+              topLevelActivities={topLevelActivities}
+              defaultDate={null}
+              createActivity={createActivity}
+              updateActivity={updateActivity}
+              deleteActivity={deleteActivity}
+            />
+          ))}
+        </Stack>
+      )}
     </Stack>
   );
 }
 
-function ActivityRow({
-  activity,
+function DaySection({
   tripId,
-  onDelete,
-  nested,
+  day,
+  activities,
+  childrenOf,
+  topLevelActivities,
+  createActivity,
+  updateActivity,
+  deleteActivity,
 }: {
-  activity: Activity;
   tripId: string;
-  onDelete: DeleteActivity;
-  nested?: boolean;
+  day: Date;
+  activities: Activity[];
+  childrenOf: (parentId: string) => Activity[];
+  topLevelActivities: Activity[];
+  createActivity: CreateActivity;
+  updateActivity: UpdateActivity;
+  deleteActivity: DeleteActivity;
+}) {
+  const [adding, setAdding] = useState(false);
+
+  return (
+    <Stack spacing={1.5}>
+      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+        <Typography variant="h3">{formatDay(day, "EEEE, MMM d")}</Typography>
+        <IconButton size="small" aria-label="Add activity" onClick={() => setAdding((v) => !v)}>
+          <AddIcon fontSize="small" />
+        </IconButton>
+      </Stack>
+
+      <Collapse in={adding}>
+        <Card variant="outlined" sx={{ mb: 1 }}>
+          <CardContent sx={{ "&:last-child": { pb: 2 } }}>
+            <ActivityForm
+              action={createActivity.bind(null, tripId)}
+              submitLabel="Add activity"
+              defaultDate={day}
+              topLevelActivities={topLevelActivities}
+              compact
+              onSaved={() => setAdding(false)}
+            />
+          </CardContent>
+        </Card>
+      </Collapse>
+
+      {activities.map((activity) => (
+        <ActivityCardEditable
+          key={activity.id}
+          tripId={tripId}
+          activity={activity}
+          childActivities={childrenOf(activity.id)}
+          topLevelActivities={topLevelActivities}
+          defaultDate={day}
+          createActivity={createActivity}
+          updateActivity={updateActivity}
+          deleteActivity={deleteActivity}
+        />
+      ))}
+
+      {activities.length === 0 && (
+        <Typography variant="body2" color="text.secondary">
+          Nothing planned yet.
+        </Typography>
+      )}
+    </Stack>
+  );
+}
+
+function ActivityCardEditable({
+  tripId,
+  activity,
+  childActivities,
+  topLevelActivities,
+  defaultDate,
+  createActivity,
+  updateActivity,
+  deleteActivity,
+}: {
+  tripId: string;
+  activity: Activity;
+  childActivities: Activity[];
+  topLevelActivities: Activity[];
+  defaultDate: Date | null;
+  createActivity: CreateActivity;
+  updateActivity: UpdateActivity;
+  deleteActivity: DeleteActivity;
 }) {
   return (
-    <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-      <Stack>
-        <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
-          {activity.travelMode && <TravelIcon mode={activity.travelMode} sx={{ fontSize: 16, color: "text.secondary" }} />}
-          <Typography variant={nested ? "body2" : "subtitle1"} sx={{ fontWeight: nested ? 600 : undefined }}>
-            {activity.title}
+    <Card variant="outlined">
+      <CardContent sx={{ "&:last-child": { pb: 2 } }}>
+        <ActivityRow
+          tripId={tripId}
+          activity={activity}
+          topLevelActivities={topLevelActivities}
+          updateActivity={updateActivity}
+          deleteActivity={deleteActivity}
+        />
+
+        {childActivities.length > 0 && (
+          <Stack spacing={1.5} sx={{ mt: 1, pl: 2, borderLeft: "2px solid", borderColor: "divider" }}>
+            {childActivities.map((child) => (
+              <ActivityRow
+                key={child.id}
+                tripId={tripId}
+                activity={child}
+                topLevelActivities={topLevelActivities}
+                updateActivity={updateActivity}
+                deleteActivity={deleteActivity}
+                nested
+              />
+            ))}
+          </Stack>
+        )}
+
+        <AddActivityInline
+          tripId={tripId}
+          parentId={activity.id}
+          defaultDate={defaultDate}
+          createActivity={createActivity}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+function ActivityRow({
+  tripId,
+  activity,
+  topLevelActivities,
+  updateActivity,
+  deleteActivity,
+  nested,
+}: {
+  tripId: string;
+  activity: Activity;
+  topLevelActivities: Activity[];
+  updateActivity: UpdateActivity;
+  deleteActivity: DeleteActivity;
+  nested?: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+
+  return (
+    <Stack spacing={0.5}>
+      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+        <Stack>
+          <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+            {activity.travelMode && <TravelIcon mode={activity.travelMode} sx={{ fontSize: 16, color: "text.secondary" }} />}
+            <Typography variant={nested ? "body2" : "subtitle1"} sx={{ fontWeight: nested ? 600 : undefined }}>
+              {activity.title}
+            </Typography>
+          </Stack>
+          <Typography variant="caption" color="text.secondary">
+            {activity.date ? formatDay(activity.date, "MMM d") : "No date"}
+            {activity.startTime ? ` · ${format(activity.startTime, "HH:mm")}` : ""}
+            {activity.endTime ? `–${format(activity.endTime, "HH:mm")}` : ""}
+            {activity.recommendedMins ? ` · ~${activity.recommendedMins}min` : ""}
           </Typography>
         </Stack>
-        <Typography variant="caption" color="text.secondary">
-          {activity.date ? formatDay(activity.date, "MMM d") : "No date"}
-          {activity.startTime ? ` · ${format(activity.startTime, "HH:mm")}` : ""}
-          {activity.endTime ? `–${format(activity.endTime, "HH:mm")}` : ""}
-          {activity.recommendedMins ? ` · ~${activity.recommendedMins}min` : ""}
-        </Typography>
+        <Stack direction="row">
+          <IconButton size="small" aria-label="Edit activity" onClick={() => setEditing((v) => !v)}>
+            <EditOutlinedIcon fontSize="small" />
+          </IconButton>
+          <form action={deleteActivity.bind(null, tripId, activity.id)}>
+            <IconButton type="submit" size="small" aria-label="Delete activity">
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </form>
+        </Stack>
       </Stack>
-      <form action={onDelete.bind(null, tripId, activity.id)}>
-        <IconButton type="submit" size="small" aria-label="Delete activity">
-          <DeleteOutlineIcon fontSize="small" />
-        </IconButton>
-      </form>
+
+      <Collapse in={editing}>
+        <Stack sx={{ pt: 1 }}>
+          <ActivityForm
+            action={updateActivity.bind(null, tripId, activity.id)}
+            submitLabel="Save"
+            activity={activity}
+            defaultDate={activity.date}
+            topLevelActivities={topLevelActivities.filter((a) => a.id !== activity.id)}
+            compact
+            onSaved={() => setEditing(false)}
+          />
+        </Stack>
+      </Collapse>
     </Stack>
   );
 }
@@ -114,15 +291,13 @@ function ActivityRow({
 function AddActivityInline({
   tripId,
   parentId,
-  parentDate,
+  defaultDate,
   createActivity,
-  label,
 }: {
   tripId: string;
   parentId: string;
-  parentDate: Date | null;
+  defaultDate: Date | null;
   createActivity: CreateActivity;
-  label: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -134,17 +309,18 @@ function AddActivityInline({
         onClick={() => setOpen((v) => !v)}
         sx={{ alignSelf: "flex-start" }}
       >
-        {label}
+        Add nested item
       </Button>
       <Collapse in={open}>
         <Stack sx={{ pt: 1.5 }}>
           <ActivityForm
-            tripId={tripId}
-            createActivity={createActivity}
-            topLevelActivities={[]}
+            action={createActivity.bind(null, tripId)}
+            submitLabel="Add activity"
             fixedParentId={parentId}
-            defaultDate={parentDate}
+            defaultDate={defaultDate}
+            topLevelActivities={[]}
             compact
+            onSaved={() => setOpen(false)}
           />
         </Stack>
       </Collapse>
@@ -153,32 +329,46 @@ function AddActivityInline({
 }
 
 function ActivityForm({
-  tripId,
-  createActivity,
+  action,
+  submitLabel,
+  activity,
   topLevelActivities,
   fixedParentId,
   defaultDate,
   compact,
+  onSaved,
 }: {
-  tripId: string;
-  createActivity: CreateActivity;
+  action: (formData: FormData) => Promise<void>;
+  submitLabel: string;
+  activity?: Activity;
   topLevelActivities: Activity[];
   fixedParentId?: string;
   defaultDate?: Date | null;
   compact?: boolean;
+  onSaved?: () => void;
 }) {
+  const size = compact ? "small" : "medium";
+  const parentId = fixedParentId ?? activity?.parentId ?? "";
+
   return (
-    <Stack component="form" action={createActivity.bind(null, tripId)} spacing={1.5}>
-      <TextField name="title" label="Title" required fullWidth size={compact ? "small" : "medium"} />
+    <Stack
+      component="form"
+      action={async (formData: FormData) => {
+        await action(formData);
+        onSaved?.();
+      }}
+      spacing={1.5}
+    >
+      <TextField name="title" label="Title" required fullWidth size={size} defaultValue={activity?.title} />
 
       {!fixedParentId && (
         <TextField
           name="parentId"
           label="Nest inside (optional)"
           select
-          defaultValue=""
+          defaultValue={parentId}
           fullWidth
-          size={compact ? "small" : "medium"}
+          size={size}
         >
           <MenuItem value="">— Top level —</MenuItem>
           {topLevelActivities.map((a) => (
@@ -196,7 +386,7 @@ function ActivityForm({
           label="Date"
           type="date"
           fullWidth
-          size={compact ? "small" : "medium"}
+          size={size}
           defaultValue={defaultDate ? formatDay(defaultDate, "yyyy-MM-dd") : ""}
           slotProps={{ inputLabel: { shrink: true } }}
         />
@@ -205,7 +395,8 @@ function ActivityForm({
           label="Recommended (min)"
           type="number"
           fullWidth
-          size={compact ? "small" : "medium"}
+          size={size}
+          defaultValue={activity?.recommendedMins ?? ""}
         />
       </Stack>
 
@@ -215,7 +406,8 @@ function ActivityForm({
           label="Start"
           type="time"
           fullWidth
-          size={compact ? "small" : "medium"}
+          size={size}
+          defaultValue={activity?.startTime ? format(activity.startTime, "HH:mm") : ""}
           slotProps={{ inputLabel: { shrink: true } }}
         />
         <TextField
@@ -223,22 +415,31 @@ function ActivityForm({
           label="End"
           type="time"
           fullWidth
-          size={compact ? "small" : "medium"}
+          size={size}
+          defaultValue={activity?.endTime ? format(activity.endTime, "HH:mm") : ""}
           slotProps={{ inputLabel: { shrink: true } }}
         />
       </Stack>
 
-      <TextField name="location" label="Location" fullWidth size={compact ? "small" : "medium"} />
-      <TextField name="description" label="Notes" fullWidth multiline minRows={2} size={compact ? "small" : "medium"} />
+      <TextField name="location" label="Location" fullWidth size={size} defaultValue={activity?.location ?? ""} />
+      <TextField
+        name="description"
+        label="Notes"
+        fullWidth
+        multiline
+        minRows={2}
+        size={size}
+        defaultValue={activity?.description ?? ""}
+      />
 
       <Stack direction="row" spacing={1.5}>
         <TextField
           name="travelMode"
           label="Travel from previous"
           select
-          defaultValue=""
+          defaultValue={activity?.travelMode ?? ""}
           fullWidth
-          size={compact ? "small" : "medium"}
+          size={size}
         >
           <MenuItem value="">— None —</MenuItem>
           {Object.values(TravelMode).map((mode) => (
@@ -252,12 +453,13 @@ function ActivityForm({
           label="Travel time (min)"
           type="number"
           fullWidth
-          size={compact ? "small" : "medium"}
+          size={size}
+          defaultValue={activity?.travelMinsFromPrev ?? ""}
         />
       </Stack>
 
-      <Button type="submit" variant="outlined" size={compact ? "small" : "medium"} sx={{ alignSelf: "flex-start" }}>
-        Add activity
+      <Button type="submit" variant="outlined" size={size} sx={{ alignSelf: "flex-start" }}>
+        {submitLabel}
       </Button>
     </Stack>
   );
