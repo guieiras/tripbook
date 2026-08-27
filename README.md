@@ -23,7 +23,9 @@ public read-only page at `/t/<slug>`.
    node scripts/hash-password.mjs "your password"
    ```
 
-   Paste the output into `ADMIN_PASSWORD_HASH` in `.env`.
+   Paste the printed `ADMIN_PASSWORD_HASH=...` line as-is into `.env` — it
+   already escapes the `$` characters in the hash, which Next.js would
+   otherwise try to expand as variable references and silently corrupt.
 
 3. Install deps and run migrations:
 
