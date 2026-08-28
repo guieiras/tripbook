@@ -16,7 +16,9 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
+import PlaceIcon from "@mui/icons-material/PlaceOutlined";
 import { TravelIcon, TRAVEL_MODE_LABEL } from "@/components/travel-icon";
+import { formatMinutes } from "@/components/time-range";
 import { ActivityTypeIcon, ACTIVITY_TYPE_LABEL } from "@/components/activity-type-icon";
 import type { ActivityModel as Activity } from "@/generated/prisma/models";
 import { ActivityType, TravelMode } from "@/generated/prisma/enums";
@@ -245,17 +247,10 @@ function ActivityRow({
 }) {
   const [editing, setEditing] = useState(false);
 
-  const missing = [
-    !activity.recommendedMins && "Recommended (min)",
-    !(activity.travelMode && activity.travelMinsFromPrev) && "Travel time",
-    !activity.location && "Location",
-    !activity.description && "Notes",
-  ].filter((v): v is string => Boolean(v));
-
   return (
     <Stack spacing={0.5}>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-        <Stack>
+        <Stack sx={{ minWidth: 0 }}>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
             {activity.travelMode && <TravelIcon mode={activity.travelMode} sx={{ fontSize: 16, color: "text.secondary" }} />}
             {activity.type && <ActivityTypeIcon type={activity.type} sx={{ fontSize: 16, color: "text.secondary" }} />}
@@ -268,11 +263,22 @@ function ActivityRow({
             {activity.startTime ? ` · ${format(activity.startTime, "HH:mm")}` : ""}
             {activity.endTime ? `–${format(activity.endTime, "HH:mm")}` : ""}
             {activity.overnight ? " (+1 day)" : ""}
-            {activity.recommendedMins ? ` · ~${activity.recommendedMins}min` : ""}
+            {activity.recommendedMins ? ` · ~${formatMinutes(activity.recommendedMins)}` : ""}
           </Typography>
-          {missing.length > 0 && (
-            <Typography variant="caption" sx={{ color: "warning.main" }}>
-              Missing: {missing.join(", ")}
+          {activity.travelMode && activity.travelMinsFromPrev && (
+            <Typography variant="caption" color="text.secondary">
+              {TRAVEL_MODE_LABEL[activity.travelMode]} · {formatMinutes(activity.travelMinsFromPrev)} from previous
+            </Typography>
+          )}
+          {activity.location && (
+            <Stack direction="row" spacing={0.4} sx={{ alignItems: "center", color: "text.secondary" }}>
+              <PlaceIcon sx={{ fontSize: 14 }} />
+              <Typography variant="caption">{activity.location}</Typography>
+            </Stack>
+          )}
+          {activity.description && (
+            <Typography variant="caption" color="text.secondary" sx={{ fontStyle: "italic" }}>
+              {activity.description}
             </Typography>
           )}
         </Stack>
