@@ -13,7 +13,7 @@ export function ActivityCard({ activity }: { activity: ActivityWithChildren }) {
   const hasChildren = activity.children.length > 0;
 
   return (
-    <Stack spacing={1}>
+    <Stack spacing={0.25}>
       {activity.travelMode && activity.travelMinsFromPrev ? (
         <TravelSegment
           mode={activity.travelMode as TravelMode}
@@ -54,7 +54,7 @@ export function ActivityCard({ activity }: { activity: ActivityWithChildren }) {
           {hasChildren && (
             <Stack spacing={1} sx={{ mt: 1.5, pl: 1.5, borderLeft: "2px solid", borderColor: "divider" }}>
               {activity.children.map((child) => (
-                <Stack key={child.id} spacing={0.5}>
+                <Stack key={child.id} spacing={0.25}>
                   {child.travelMode && child.travelMinsFromPrev ? (
                     <TravelSegment mode={child.travelMode as TravelMode} mins={child.travelMinsFromPrev} />
                   ) : null}

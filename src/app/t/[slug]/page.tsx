@@ -38,7 +38,7 @@ export default async function TripPage({
               <Typography variant="h2" sx={{ mb: 1.5 }}>
                 {formatDay(day.date, "EEEE, MMM d")}
               </Typography>
-              <Stack spacing={1.5}>
+              <Stack spacing={0.5}>
                 {day.flightContinuations.map((flight) => (
                   <FlightArrivalCard key={`${flight.id}-arrival`} flight={flight} />
                 ))}

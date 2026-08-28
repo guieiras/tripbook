@@ -16,7 +16,7 @@ const connectorLine = {
  * icon + time centered on the line, rather than a wide horizontal bar. */
 export function TravelSegment({ mode, mins }: { mode: TravelMode; mins: number }) {
   return (
-    <Stack spacing={0.25} sx={{ alignItems: "center", py: 0.25 }}>
+    <Stack spacing={0.25} sx={{ alignItems: "center", py: 0 }}>
       <Box sx={connectorLine} />
       <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", color: "text.secondary" }}>
         <TravelIcon mode={mode} sx={{ fontSize: 14 }} />
