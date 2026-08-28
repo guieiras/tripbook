@@ -39,18 +39,18 @@ export default async function TripPage({
                 {formatDay(day.date, "EEEE, MMM d")}
               </Typography>
               <Stack spacing={0.5}>
-                {day.flightContinuations.map((flight) => (
-                  <FlightArrivalCard key={`${flight.id}-arrival`} flight={flight} />
-                ))}
-                {day.activityContinuations.map((activity) => (
-                  <ActivityContinuationCard key={`${activity.id}-continuation`} activity={activity} />
-                ))}
-                {day.flights.map((flight) => (
-                  <FlightCard key={flight.id} flight={flight} />
-                ))}
-                {day.activities.map((activity) => (
-                  <ActivityCard key={activity.id} activity={activity} />
-                ))}
+                {day.items.map((item) => {
+                  switch (item.kind) {
+                    case "flight":
+                      return <FlightCard key={item.flight.id} flight={item.flight} />;
+                    case "flightContinuation":
+                      return <FlightArrivalCard key={`${item.flight.id}-arrival`} flight={item.flight} />;
+                    case "activity":
+                      return <ActivityCard key={item.activity.id} activity={item.activity} />;
+                    case "activityContinuation":
+                      return <ActivityContinuationCard key={`${item.activity.id}-continuation`} activity={item.activity} />;
+                  }
+                })}
               </Stack>
             </Box>
           ))}

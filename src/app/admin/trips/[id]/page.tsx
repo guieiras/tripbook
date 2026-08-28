@@ -31,7 +31,7 @@ export default async function EditTripPage({
     include: {
       flights: { orderBy: { departureAt: "asc" } },
       activities: {
-        orderBy: [{ date: "asc" }, { sortOrder: "asc" }],
+        orderBy: [{ date: "asc" }, { startTime: { sort: "asc", nulls: "last" } }, { createdAt: "asc" }],
       },
     },
   });
