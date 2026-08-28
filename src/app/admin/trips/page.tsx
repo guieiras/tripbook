@@ -10,6 +10,10 @@ import { createTrip, logout } from "@/app/admin/actions";
 import { NavCardActionArea } from "@/components/nav-card-action-area";
 import { formatDay } from "@/lib/format-day";
 
+// Always cookie-authenticated and reads live data — never prerender this
+// as a static page (which would require a DB connection at build time).
+export const dynamic = "force-dynamic";
+
 export default async function TripsListPage() {
   const trips = await prisma.trip.findMany({ orderBy: { startDate: "desc" } });
 
