@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { formatUTC } from "@/lib/format-utc";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import ScheduleIcon from "@mui/icons-material/Schedule";
@@ -18,8 +18,8 @@ export function TimeRange({
     <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", flexWrap: "wrap" }}>
       {start && (
         <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-          {format(start, "HH:mm")}
-          {end ? ` – ${format(end, "HH:mm")}` : ""}
+          {formatUTC(start, "HH:mm")}
+          {end ? ` – ${formatUTC(end, "HH:mm")}` : ""}
         </Typography>
       )}
       {recommendedMins ? (

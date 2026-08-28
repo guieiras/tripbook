@@ -13,8 +13,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import { format } from "date-fns";
-import { formatDay } from "@/lib/format-day";
+import { formatUTC } from "@/lib/format-utc";
 import type { FlightModel as Flight } from "@/generated/prisma/models";
 
 type UpdateFlight = (tripId: string, flightId: string, formData: FormData) => Promise<void>;
@@ -70,7 +69,7 @@ function FlightRow({
               {flight.fromAirport} → {flight.toAirport}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {formatDay(flight.departureAt, "MMM d")}, {format(flight.departureAt, "HH:mm")} – {format(flight.arrivalAt, "HH:mm")}
+              {formatUTC(flight.departureAt, "MMM d")}, {formatUTC(flight.departureAt, "HH:mm")} – {formatUTC(flight.arrivalAt, "HH:mm")}
               {flight.overnight ? " (+1 day)" : ""}
               {flight.airline ? ` · ${flight.airline} ${flight.flightNumber ?? ""}` : ""}
             </Typography>
@@ -143,7 +142,7 @@ function FlightForm({
         required
         fullWidth
         size={size}
-        defaultValue={flight ? formatDay(flight.departureAt, "yyyy-MM-dd") : ""}
+        defaultValue={flight ? formatUTC(flight.departureAt, "yyyy-MM-dd") : ""}
         slotProps={{ inputLabel: { shrink: true } }}
       />
       <Stack direction="row" spacing={2}>
@@ -154,7 +153,7 @@ function FlightForm({
           required
           fullWidth
           size={size}
-          defaultValue={flight ? format(flight.departureAt, "HH:mm") : ""}
+          defaultValue={flight ? formatUTC(flight.departureAt, "HH:mm") : ""}
           slotProps={{ inputLabel: { shrink: true } }}
         />
         <TextField
@@ -164,7 +163,7 @@ function FlightForm({
           required
           fullWidth
           size={size}
-          defaultValue={flight ? format(flight.arrivalAt, "HH:mm") : ""}
+          defaultValue={flight ? formatUTC(flight.arrivalAt, "HH:mm") : ""}
           slotProps={{ inputLabel: { shrink: true } }}
         />
       </Stack>

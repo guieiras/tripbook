@@ -71,9 +71,17 @@ export async function deleteTrip(tripId: string) {
   redirect("/admin/trips");
 }
 
+/**
+ * Trip times have no real destination-timezone concept — they're just the
+ * literal digits an admin typed. Anchoring the parse to UTC (the "Z" suffix)
+ * makes the stored value independent of whatever timezone the server action
+ * happens to execute in (a local dev machine vs. a Vercel serverless
+ * function are not guaranteed to agree). Pair with formatUTC() on every
+ * read path so the displayed HH:mm always matches what was typed.
+ */
 function toDateTime(dateStr: string, timeStr: string) {
   if (!timeStr) return null;
-  return new Date(`${dateStr}T${timeStr}:00`);
+  return new Date(`${dateStr}T${timeStr}:00.000Z`);
 }
 
 function addDays(dateStr: string, days: number) {

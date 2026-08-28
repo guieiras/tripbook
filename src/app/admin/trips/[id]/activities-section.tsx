@@ -15,14 +15,13 @@ import Checkbox from "@mui/material/Checkbox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddIcon from "@mui/icons-material/Add";
-import { format } from "date-fns";
 import PlaceIcon from "@mui/icons-material/PlaceOutlined";
 import { TravelIcon, TRAVEL_MODE_LABEL } from "@/components/travel-icon";
 import { formatMinutes } from "@/components/time-range";
 import { ActivityTypeIcon, ACTIVITY_TYPE_LABEL } from "@/components/activity-type-icon";
 import type { ActivityModel as Activity } from "@/generated/prisma/models";
 import { ActivityType, TravelMode } from "@/generated/prisma/enums";
-import { formatDay } from "@/lib/format-day";
+import { formatUTC } from "@/lib/format-utc";
 import { dayKey } from "@/lib/day";
 
 type CreateActivity = (tripId: string, formData: FormData) => Promise<void>;
@@ -129,7 +128,7 @@ function DaySection({
   return (
     <Stack spacing={1.5}>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h3">{formatDay(day, "EEEE, MMM d")}</Typography>
+        <Typography variant="h3">{formatUTC(day, "EEEE, MMM d")}</Typography>
         <IconButton size="small" aria-label="Add activity" onClick={() => setAdding((v) => !v)}>
           <AddIcon fontSize="small" />
         </IconButton>
@@ -266,9 +265,9 @@ function ActivityRow({
             )}
           </Stack>
           <Typography variant="caption" color="text.secondary">
-            {activity.date ? formatDay(activity.date, "MMM d") : "No date"}
-            {activity.startTime ? ` · ${format(activity.startTime, "HH:mm")}` : ""}
-            {activity.endTime ? `–${format(activity.endTime, "HH:mm")}` : ""}
+            {activity.date ? formatUTC(activity.date, "MMM d") : "No date"}
+            {activity.startTime ? ` · ${formatUTC(activity.startTime, "HH:mm")}` : ""}
+            {activity.endTime ? `–${formatUTC(activity.endTime, "HH:mm")}` : ""}
             {activity.overnight ? " (+1 day)" : ""}
             {activity.recommendedMins ? ` · ~${formatMinutes(activity.recommendedMins)}` : ""}
           </Typography>
@@ -434,7 +433,7 @@ function ActivityForm({
           type="date"
           fullWidth
           size={size}
-          defaultValue={defaultDate ? formatDay(defaultDate, "yyyy-MM-dd") : ""}
+          defaultValue={defaultDate ? formatUTC(defaultDate, "yyyy-MM-dd") : ""}
           slotProps={{ inputLabel: { shrink: true } }}
         />
         <TextField
@@ -454,7 +453,7 @@ function ActivityForm({
           type="time"
           fullWidth
           size={size}
-          defaultValue={activity?.startTime ? format(activity.startTime, "HH:mm") : ""}
+          defaultValue={activity?.startTime ? formatUTC(activity.startTime, "HH:mm") : ""}
           slotProps={{ inputLabel: { shrink: true } }}
         />
         <TextField
@@ -463,7 +462,7 @@ function ActivityForm({
           type="time"
           fullWidth
           size={size}
-          defaultValue={activity?.endTime ? format(activity.endTime, "HH:mm") : ""}
+          defaultValue={activity?.endTime ? formatUTC(activity.endTime, "HH:mm") : ""}
           slotProps={{ inputLabel: { shrink: true } }}
         />
       </Stack>

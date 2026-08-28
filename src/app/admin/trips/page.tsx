@@ -8,7 +8,7 @@ import TextField from "@mui/material/TextField";
 import { prisma } from "@/lib/prisma";
 import { createTrip, logout } from "@/app/admin/actions";
 import { NavCardActionArea } from "@/components/nav-card-action-area";
-import { formatDay } from "@/lib/format-day";
+import { formatUTC } from "@/lib/format-utc";
 
 // Always cookie-authenticated and reads live data — never prerender this
 // as a static page (which would require a DB connection at build time).
@@ -35,7 +35,7 @@ export default async function TripsListPage() {
               <CardContent>
                 <Typography variant="subtitle1">{trip.title}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {formatDay(trip.startDate, "MMM d")} – {formatDay(trip.endDate, "MMM d, yyyy")}
+                  {formatUTC(trip.startDate, "MMM d")} – {formatUTC(trip.endDate, "MMM d, yyyy")}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   /t/{trip.slug}

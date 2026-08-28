@@ -3,7 +3,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
-import { format } from "date-fns";
+import { formatUTC } from "@/lib/format-utc";
 import type { TripWithDetails } from "@/lib/itinerary";
 
 export function FlightCard({ flight }: { flight: TripWithDetails["flights"][number] }) {
@@ -17,7 +17,7 @@ export function FlightCard({ flight }: { flight: TripWithDetails["flights"][numb
           </Typography>
         </Stack>
         <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
-          {format(flight.departureAt, "HH:mm")} – {format(flight.arrivalAt, "HH:mm")}
+          {formatUTC(flight.departureAt, "HH:mm")} – {formatUTC(flight.arrivalAt, "HH:mm")}
           {flight.overnight && (
             <Typography component="span" variant="caption" sx={{ verticalAlign: "super", ml: 0.25 }}>
               +1

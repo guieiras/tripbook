@@ -5,7 +5,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import type { TripModel as Trip } from "@/generated/prisma/models";
-import { formatDay } from "@/lib/format-day";
+import { formatUTC } from "@/lib/format-utc";
 
 export function TripDetailsForm({
   trip,
@@ -27,7 +27,7 @@ export function TripDetailsForm({
             name="startDate"
             label="Start date"
             type="date"
-            defaultValue={formatDay(trip.startDate, "yyyy-MM-dd")}
+            defaultValue={formatUTC(trip.startDate, "yyyy-MM-dd")}
             required
             fullWidth
             slotProps={{ inputLabel: { shrink: true } }}
@@ -36,7 +36,7 @@ export function TripDetailsForm({
             name="endDate"
             label="End date"
             type="date"
-            defaultValue={formatDay(trip.endDate, "yyyy-MM-dd")}
+            defaultValue={formatUTC(trip.endDate, "yyyy-MM-dd")}
             required
             fullWidth
             slotProps={{ inputLabel: { shrink: true } }}

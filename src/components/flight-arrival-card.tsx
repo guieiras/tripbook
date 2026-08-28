@@ -3,7 +3,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import FlightLandIcon from "@mui/icons-material/FlightLand";
-import { format } from "date-fns";
+import { formatUTC } from "@/lib/format-utc";
 import type { TripWithDetails } from "@/lib/itinerary";
 
 /** The "tail" of an overnight flight, shown on its arrival day so travel
@@ -31,7 +31,7 @@ export function FlightArrivalCard({ flight }: { flight: TripWithDetails["flights
             </Typography>
           </Stack>
           <Typography variant="body2" sx={{ opacity: 0.9 }}>
-            {format(flight.arrivalAt, "HH:mm")}
+            {formatUTC(flight.arrivalAt, "HH:mm")}
           </Typography>
         </Stack>
       </CardContent>

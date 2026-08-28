@@ -2,7 +2,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import { format } from "date-fns";
+import { formatUTC } from "@/lib/format-utc";
 import { ActivityTypeIcon } from "@/components/activity-type-icon";
 import type { ActivityWithChildren } from "@/lib/itinerary";
 
@@ -22,7 +22,7 @@ export function ActivityContinuationCard({ activity }: { activity: ActivityWithC
             </Typography>
           </Stack>
           <Typography variant="body2" color="text.secondary">
-            Until {activity.endTime ? format(activity.endTime, "HH:mm") : ""}
+            Until {activity.endTime ? formatUTC(activity.endTime, "HH:mm") : ""}
           </Typography>
         </Stack>
       </CardContent>
