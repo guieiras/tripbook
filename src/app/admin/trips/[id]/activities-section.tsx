@@ -252,7 +252,6 @@ function ActivityRow({
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
         <Stack sx={{ minWidth: 0 }}>
           <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
-            {activity.travelMode && <TravelIcon mode={activity.travelMode} sx={{ fontSize: 16, color: "text.secondary" }} />}
             {activity.type && <ActivityTypeIcon type={activity.type} sx={{ fontSize: 16, color: "text.secondary" }} />}
             <Typography variant={nested ? "body2" : "subtitle1"} sx={{ fontWeight: nested ? 600 : undefined }}>
               {activity.title}
@@ -266,9 +265,12 @@ function ActivityRow({
             {activity.recommendedMins ? ` · ~${formatMinutes(activity.recommendedMins)}` : ""}
           </Typography>
           {activity.travelMode && activity.travelMinsFromPrev && (
-            <Typography variant="caption" color="text.secondary">
-              {TRAVEL_MODE_LABEL[activity.travelMode]} · {formatMinutes(activity.travelMinsFromPrev)} from previous
-            </Typography>
+            <Stack direction="row" spacing={0.4} sx={{ alignItems: "center", color: "text.secondary" }}>
+              <TravelIcon mode={activity.travelMode} sx={{ fontSize: 14 }} />
+              <Typography variant="caption">
+                {TRAVEL_MODE_LABEL[activity.travelMode]} · {formatMinutes(activity.travelMinsFromPrev)} from previous
+              </Typography>
+            </Stack>
           )}
           {activity.location && (
             <Stack direction="row" spacing={0.4} sx={{ alignItems: "center", color: "text.secondary" }}>
