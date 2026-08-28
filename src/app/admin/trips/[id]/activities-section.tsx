@@ -245,6 +245,13 @@ function ActivityRow({
 }) {
   const [editing, setEditing] = useState(false);
 
+  const missing = [
+    !activity.recommendedMins && "Recommended (min)",
+    !(activity.travelMode && activity.travelMinsFromPrev) && "Travel time",
+    !activity.location && "Location",
+    !activity.description && "Notes",
+  ].filter((v): v is string => Boolean(v));
+
   return (
     <Stack spacing={0.5}>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -263,6 +270,11 @@ function ActivityRow({
             {activity.overnight ? " (+1 day)" : ""}
             {activity.recommendedMins ? ` · ~${activity.recommendedMins}min` : ""}
           </Typography>
+          {missing.length > 0 && (
+            <Typography variant="caption" sx={{ color: "warning.main" }}>
+              Missing: {missing.join(", ")}
+            </Typography>
+          )}
         </Stack>
         <Stack direction="row">
           <IconButton size="small" aria-label="Edit activity" onClick={() => setEditing((v) => !v)}>
