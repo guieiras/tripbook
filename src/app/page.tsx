@@ -3,7 +3,6 @@ import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
-import { NavButton } from "@/components/nav-button";
 
 export default function Home() {
   return (
@@ -32,10 +31,6 @@ export default function Home() {
               nested stops laid out day by day.
             </Typography>
           </Stack>
-
-          <NavButton href="/admin" variant="contained" size="large">
-            Go to admin
-          </NavButton>
         </Stack>
       </Container>
     </Box>
