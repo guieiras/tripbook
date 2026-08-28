@@ -256,6 +256,14 @@ function ActivityRow({
             <Typography variant={nested ? "body2" : "subtitle1"} sx={{ fontWeight: nested ? 600 : undefined }}>
               {activity.title}
             </Typography>
+            {activity.tentative && (
+              <Typography
+                variant="caption"
+                sx={{ color: "text.secondary", border: "1px dashed", borderColor: "divider", borderRadius: 1, px: 0.6 }}
+              >
+                Tentative
+              </Typography>
+            )}
           </Stack>
           <Typography variant="caption" color="text.secondary">
             {activity.date ? formatDay(activity.date, "MMM d") : "No date"}
@@ -463,6 +471,11 @@ function ActivityForm({
       <FormControlLabel
         control={<Checkbox name="overnight" defaultChecked={activity?.overnight ?? false} size={size} />}
         label="Ends next day (overnight)"
+      />
+
+      <FormControlLabel
+        control={<Checkbox name="tentative" defaultChecked={activity?.tentative ?? false} size={size} />}
+        label="Tentative (may not fit)"
       />
 
       <TextField name="location" label="Location" fullWidth size={size} defaultValue={activity?.location ?? ""} />

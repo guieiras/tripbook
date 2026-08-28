@@ -21,7 +21,10 @@ export function ActivityCard({ activity }: { activity: ActivityWithChildren }) {
         />
       ) : null}
 
-      <Card variant="outlined">
+      <Card
+        variant="outlined"
+        sx={activity.tentative ? { borderStyle: "dashed", borderWidth: 2 } : undefined}
+      >
         <CardContent sx={{ "&:last-child": { pb: 2 } }}>
           <Stack spacing={0.75}>
             <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
@@ -29,6 +32,14 @@ export function ActivityCard({ activity }: { activity: ActivityWithChildren }) {
                 <ActivityTypeIcon type={activity.type} sx={{ fontSize: 18, color: "text.secondary" }} />
               )}
               <Typography variant="subtitle1">{activity.title}</Typography>
+              {activity.tentative && (
+                <Typography
+                  variant="caption"
+                  sx={{ color: "text.secondary", border: "1px dashed", borderColor: "divider", borderRadius: 1, px: 0.6 }}
+                >
+                  Tentative
+                </Typography>
+              )}
             </Stack>
 
             <TimeRange
@@ -65,6 +76,14 @@ export function ActivityCard({ activity }: { activity: ActivityWithChildren }) {
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {child.title}
                     </Typography>
+                    {child.tentative && (
+                      <Typography
+                        variant="caption"
+                        sx={{ color: "text.secondary", border: "1px dashed", borderColor: "divider", borderRadius: 1, px: 0.6 }}
+                      >
+                        Tentative
+                      </Typography>
+                    )}
                   </Stack>
                   <TimeRange
                     start={child.startTime}

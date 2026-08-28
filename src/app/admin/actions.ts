@@ -137,6 +137,7 @@ function activityDataFromForm(formData: FormData) {
   const startTime = String(formData.get("startTime") ?? "");
   const endTime = String(formData.get("endTime") ?? "");
   const overnight = formData.get("overnight") === "on";
+  const tentative = formData.get("tentative") === "on";
   const recommendedMins = String(formData.get("recommendedMins") ?? "");
   const type = String(formData.get("type") ?? "");
   const travelMode = String(formData.get("travelMode") ?? "");
@@ -155,6 +156,7 @@ function activityDataFromForm(formData: FormData) {
     startTime: date && startTime ? toDateTime(date, startTime) : null,
     endTime: endDate && endTime ? toDateTime(endDate, endTime) : null,
     overnight,
+    tentative,
     recommendedMins: recommendedMins ? Number(recommendedMins) : null,
     travelMode: travelMode ? (travelMode as TravelMode) : null,
     travelMinsFromPrev: travelMinsFromPrev ? Number(travelMinsFromPrev) : null,

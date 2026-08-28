@@ -81,6 +81,9 @@ model Activity {
 
   title       String
   type        ActivityType?
+  /** Marked "if possible" — may or may not fit into the day. Rendered with
+   * a dashed border to signal it's not committed. */
+  tentative   Boolean       @default(false)
   description String?
   location    String?
 
